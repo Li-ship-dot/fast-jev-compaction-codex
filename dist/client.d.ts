@@ -8,12 +8,15 @@ export interface JevClientOptions {
     baseUrl?: string;
     /** Defaults to the global `fetch`. */
     fetch?: typeof fetch;
+    /** Covers headers and body; defaults to 60 seconds. */
+    timeoutMs?: number;
 }
 /** Asks Jev over HTTP with the global `fetch` (or an injected one). */
 export declare class JevClient implements JevAsker {
     private readonly apiKey;
     private readonly model;
     private readonly baseUrl;
+    private readonly timeoutMs;
     private readonly fetcher;
     constructor(options?: JevClientOptions);
     ask(state: JevState, questions: JevQuestions): Promise<JevResponse>;

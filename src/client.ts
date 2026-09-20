@@ -10,6 +10,8 @@ export interface JevClientOptions {
   baseUrl?: string;
   /** Defaults to the global `fetch`. */
   fetch?: typeof fetch;
+  /** Covers headers and body; defaults to 60 seconds. */
+  timeoutMs?: number;
 }
 
 /** Asks Jev over HTTP with the global `fetch` (or an injected one). */
@@ -17,12 +19,15 @@ export class JevClient implements JevAsker {
   private readonly apiKey: string;
   private readonly model: string | undefined;
   private readonly baseUrl: string | undefined;
+  private readonly timeoutMs: number;
   private readonly fetcher: typeof fetch;
 
   constructor(options: JevClientOptions = {}) {
     this.apiKey = options.apiKey ?? process.env.TYPESAFE_API_KEY ?? '';
     this.model = options.model;
     this.baseUrl = options.baseUrl;
+    this.timeoutMs = options.timeoutMs ?? 60_000;
+    if (!Number.isInteger(this.timeoutMs) || this.timeoutMs <= 0) throw new Error('Invalid timeoutMs');
     this.fetcher = options.fetch ?? fetch;
   }
 
@@ -37,6 +42,8 @@ export class JevClient implements JevAsker {
       method: request.method,
       headers: request.headers,
       body: request.body,
+      signal: AbortSignal.timeout(this.timeoutMs),
+      redirect: 'error',
     });
     return parseJevResponse(response.status, response.ok, await response.text());
   }

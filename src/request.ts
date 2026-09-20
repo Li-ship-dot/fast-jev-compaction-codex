@@ -42,7 +42,7 @@ export function parseJevResponse(
   text: string,
 ): JevResponse {
   if (!ok) {
-    throw new Error(`Jev request failed (${status}): ${text.slice(0, 200)}`);
+    throw new Error(`Jev request failed (${status})`);
   }
   let parsed: unknown;
   try {
@@ -55,7 +55,7 @@ export function parseJevResponse(
     typeof parsed !== 'object' ||
     !('answers' in parsed) ||
     parsed.answers === null ||
-    typeof parsed.answers !== 'object'
+    typeof parsed.answers !== 'object' || Array.isArray(parsed.answers)
   ) {
     throw new Error('Jev response is missing answers');
   }
@@ -72,7 +72,7 @@ export function noulAnswer(
     !answer ||
     !('noul' in answer) ||
     typeof answer.noul !== 'number' ||
-    !Number.isFinite(answer.noul)
+    !Number.isFinite(answer.noul) || answer.noul < 0 || answer.noul > 1
   ) {
     throw new Error(`Invalid Jev answer for ${name}`);
   }

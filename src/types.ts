@@ -1,4 +1,4 @@
-export type Role = 'user' | 'assistant';
+export type Role = 'user' | 'assistant' | 'system' | 'developer' | 'tool';
 
 /**
  * A tool call block in an agent transcript. `text` and `isError` may mirror

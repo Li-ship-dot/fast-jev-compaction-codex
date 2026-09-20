@@ -7,7 +7,9 @@
       ],
       "cwd": ".",
       "env_vars": [
-        "TYPESAFE_API_KEY"
+        "TYPESAFE_API_KEY",
+        "TYPESAFE_BASE_URL",
+        "TYPESAFE_TIMEOUT_MS"
       ]
     }
   }

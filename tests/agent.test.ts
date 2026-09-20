@@ -10,11 +10,22 @@ describe('agent transcript adapter', () => {
     ])).toEqual([
       { role: 'user', text: 'keep this', toolUses: [] },
       { role: 'assistant', text: '', toolUses: [{ tool_use_id: 'call-1', tool: 'Read', input: { path: 'a' } }] },
-      { role: 'user', text: 'result', toolUses: [], toolResults: [{ tool_use_id: 'call-1', text: 'result' }] },
+      { role: 'tool', text: '', toolUses: [], toolResults: [{ tool_use_id: 'call-1', text: 'result' }] },
     ]);
   });
 
   it('rejects malformed message lists', () => {
     expect(() => normalizeAgentMessages([{ content: 'missing role' }])).toThrow(/role/);
+  });
+
+  it('preserves system and developer roles and fails closed on unknown fields', () => {
+    expect(normalizeAgentMessages([
+      { role: 'system', content: 'policy' },
+      { role: 'developer', content: 'context' },
+    ])).toEqual([
+      { role: 'system', text: 'policy', toolUses: [] },
+      { role: 'developer', text: 'context', toolUses: [] },
+    ]);
+    expect(() => normalizeAgentMessages([{ role: 'user', content: 'x', extra: true }])).toThrow(/Unsupported field/);
   });
 });

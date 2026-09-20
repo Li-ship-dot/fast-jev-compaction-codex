@@ -204,10 +204,12 @@ export async function compact(messages, asker, options = {}) {
         const state = fitState(messages, calls, resolved);
         fitted = state;
         batches = batchCalls(candidates, state.tokens, resolved);
-        const answered = await Promise.all(batches.map((batch) => askBatch(asker, state.state, batch)));
-        for (const map of answered)
+        // Sequential batches bound concurrency per compaction; fail without returning partial history.
+        for (const batch of batches) {
+            const map = await askBatch(asker, state.state, batch);
             for (const [id, answer] of map)
                 answers.set(id, answer);
+        }
     }
     const decisions = calls.map((call) => decideCall(call, answers.get(call.id) ?? { keepCall: 1, keepResult: 1 }, resolved));
     const kept = applyDecisions(messages, decisions, calls, resolved.truncateHeadChars);

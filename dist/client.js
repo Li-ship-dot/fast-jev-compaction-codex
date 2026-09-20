@@ -4,11 +4,15 @@ export class JevClient {
     apiKey;
     model;
     baseUrl;
+    timeoutMs;
     fetcher;
     constructor(options = {}) {
         this.apiKey = options.apiKey ?? process.env.TYPESAFE_API_KEY ?? '';
         this.model = options.model;
         this.baseUrl = options.baseUrl;
+        this.timeoutMs = options.timeoutMs ?? 60_000;
+        if (!Number.isInteger(this.timeoutMs) || this.timeoutMs <= 0)
+            throw new Error('Invalid timeoutMs');
         this.fetcher = options.fetch ?? fetch;
     }
     async ask(state, questions) {
@@ -19,6 +23,8 @@ export class JevClient {
             method: request.method,
             headers: request.headers,
             body: request.body,
+            signal: AbortSignal.timeout(this.timeoutMs),
+            redirect: 'error',
         });
         return parseJevResponse(response.status, response.ok, await response.text());
     }
