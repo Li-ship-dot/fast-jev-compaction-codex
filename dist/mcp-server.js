@@ -1,93 +1,58 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { compact } from './compact.js';
+import { JevClient } from './client.js';
+import { normalizeAgentMessages } from './agent.js';
 const TOOL_NAME = 'compact_transcript';
 const PROTOCOL_VERSION = '2024-11-05';
-function send(message) {
-    process.stdout.write(`${JSON.stringify(message)}\n`);
+const DEFAULT_TIMEOUT_MS = 60_000;
+function serverVersion() {
+    try {
+        const path = fileURLToPath(new URL('../package.json', import.meta.url));
+        return JSON.parse(readFileSync(path, 'utf8')).version;
+    }
+    catch {
+        return 'unknown';
+    }
 }
-function result(id, value) {
-    send({ jsonrpc: '2.0', id, result: value });
+function timeoutMs() {
+    const value = Number(process.env.TYPESAFE_TIMEOUT_MS ?? DEFAULT_TIMEOUT_MS);
+    return Number.isFinite(value) && value > 0 ? value : DEFAULT_TIMEOUT_MS;
 }
-function error(id, code, message) {
-    send({ jsonrpc: '2.0', id, error: { code, message } });
+function timedFetch(input, init) {
+    return fetch(input, { ...init, signal: AbortSignal.timeout(timeoutMs()) });
 }
-function isMessage(value) {
-    if (!value || typeof value !== 'object')
-        return false;
-    const message = value;
-    return ((message.role === 'user' || message.role === 'assistant') &&
-        typeof message.text === 'string' &&
-        Array.isArray(message.toolUses) &&
-        message.toolUses.every((tool) => tool && typeof tool === 'object') &&
-        (message.toolResults === undefined || Array.isArray(message.toolResults)));
-}
+function send(message) { process.stdout.write(`${JSON.stringify(message)}\n`); }
+function result(id, value) { send({ jsonrpc: '2.0', id, result: value }); }
+function error(id, code, message) { send({ jsonrpc: '2.0', id, error: { code, message } }); }
 function schema() {
     return {
-        type: 'object',
-        additionalProperties: false,
-        required: ['messages'],
+        type: 'object', additionalProperties: false, required: ['messages'],
         properties: {
-            messages: {
-                type: 'array',
-                description: 'Transcript messages with role, text, toolUses, and optional toolResults.',
-                items: { type: 'object' },
-            },
-            options: {
-                type: 'object',
-                description: 'Optional compaction thresholds and token budgets.',
-                additionalProperties: true,
-            },
-            apiKey: {
-                type: 'string',
-                description: 'Optional TypeSafe API key. Prefer TYPESAFE_API_KEY in the environment.',
-            },
+            messages: { type: 'array', description: 'Agent messages. Canonical fields are role/text/toolUses/toolResults; common content/tool_calls aliases are accepted.', items: { type: 'object' } },
+            options: { type: 'object', description: 'Optional compaction thresholds and token budgets.', additionalProperties: true },
+            apiKey: { type: 'string', description: 'Optional TypeSafe API key. Prefer TYPESAFE_API_KEY in the environment.' },
             model: { type: 'string', description: 'Optional Jev model name.' },
         },
     };
 }
 async function callTool(args) {
-    if (!Array.isArray(args.messages) || !args.messages.every(isMessage)) {
-        throw new Error('messages must be an array of valid transcript messages');
-    }
+    const messages = normalizeAgentMessages(args.messages);
     const apiKey = args.apiKey ?? process.env.TYPESAFE_API_KEY;
     if (!apiKey)
         throw new Error('TYPESAFE_API_KEY is not configured');
-    const baseUrl = process.env.TYPESAFE_BASE_URL;
-    const resultValue = await compact(args.messages, {
-        async ask(state, questions) {
-            const response = await fetch(baseUrl ?? 'https://api.typesafe.ai/v1/systemone', {
-                method: 'POST',
-                headers: {
-                    authorization: `Bearer ${apiKey}`,
-                    'content-type': 'application/json',
-                },
-                body: JSON.stringify({ model: args.model ?? 'jev-latest', state, questions }),
-            });
-            const body = await response.text();
-            if (!response.ok)
-                throw new Error(`TypeSafe Jev request failed (${response.status}): ${body.slice(0, 500)}`);
-            const parsed = JSON.parse(body);
-            if (!parsed || typeof parsed !== 'object' || !('answers' in parsed)) {
-                throw new Error('TypeSafe Jev response did not contain answers');
-            }
-            return parsed;
-        },
-    }, args.options);
-    return { ...resultValue };
+    const client = new JevClient({ apiKey, model: args.model, baseUrl: process.env.TYPESAFE_BASE_URL, fetch: timedFetch });
+    return { ...(await compact(messages, client, args.options)) };
 }
 async function handle(request) {
     const id = request.id;
     switch (request.method) {
         case 'initialize':
-            result(id, {
-                protocolVersion: PROTOCOL_VERSION,
-                capabilities: { tools: {} },
-                serverInfo: { name: 'fast-jev-compaction', version: '0.3.0' },
-            });
+            result(id, { protocolVersion: PROTOCOL_VERSION, capabilities: { tools: {} }, serverInfo: { name: 'fast-jev-compaction', version: serverVersion() } });
             return;
+        case 'notifications/initialized': return;
         case 'tools/list':
-            result(id, {
-                tools: [{ name: TOOL_NAME, description: 'Compact a supplied transcript with Jev while preserving kept content verbatim.', inputSchema: schema() }],
-            });
+            result(id, { tools: [{ name: TOOL_NAME, description: 'Compact an agent transcript with Jev while preserving kept content verbatim.', inputSchema: schema() }] });
             return;
         case 'tools/call': {
             const params = request.params ?? {};
@@ -106,9 +71,8 @@ async function handle(request) {
         case 'ping':
             result(id, {});
             return;
-        default:
-            if (id !== undefined)
-                error(id, -32601, `Method not found: ${String(request.method)}`);
+        default: if (id !== undefined)
+            error(id, -32601, `Method not found: ${String(request.method)}`);
     }
 }
 let input = '';

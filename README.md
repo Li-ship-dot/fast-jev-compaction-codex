@@ -1,10 +1,10 @@
-# Fast Jev Compaction for Codex
+# Fast Jev Compaction for Agent Hosts
 
-This repository adapts [fast-jev-compaction](https://github.com/tamaratran/fast-jev-compaction) for Codex.
+This repository adapts [fast-jev-compaction](https://github.com/tamaratran/fast-jev-compaction) as a portable Agent plugin. It exposes the same MCP server to Agent hosts and keeps a `.codex-plugin/` compatibility manifest for Codex.
 
-It exposes an on-demand MCP tool, `compact_transcript`, that uses TypeSafe Jev to decide which tool calls and tool results can be removed or truncated while keeping retained transcript content verbatim. It does not replace Codex's internal automatic compaction; Codex does not expose a public plugin hook for that behavior.
+It exposes an on-demand MCP tool, `compact_transcript`, that uses TypeSafe Jev to decide which tool calls and tool results can be removed or truncated while keeping retained transcript content verbatim. It does not replace a host's internal automatic compaction.
 
-## Install as a Codex plugin
+## Install as an Agent plugin
 
 ```sh
 npm install
@@ -13,19 +13,32 @@ npm test
 npm run build
 ```
 
-Install the local plugin through the personal marketplace after copying this repository to `~/plugins/fast-jev-compaction` and adding it to `~/.agents/plugins/marketplace.json`, or use the GitHub repository once published.
+The portable entrypoint is `plugin.json` with `mcp.json` and `skills/`. Codex can also load `.codex-plugin/plugin.json` with `.mcp.json`. The two MCP files are intentionally identical so either loader gets the same server configuration.
 
 Set `TYPESAFE_API_KEY` before using the MCP tool. The supplied transcript's compaction state is sent to `https://api.typesafe.ai/v1/systemone` by default. Set `TYPESAFE_BASE_URL` to use a compatible endpoint. Do not send secrets or private transcripts without checking the data boundary.
 
-## Tool contract
+## Agent-neutral transcript contract
 
-`compact_transcript` accepts:
+`compact_transcript` accepts a `messages` array. The canonical shape is:
+
+```json
+{
+  "role": "assistant",
+  "text": "",
+  "toolUses": [{"tool_use_id": "call-1", "tool": "Read", "input": {"path": "README.md"}}],
+  "toolResults": []
+}
+```
+
+The MCP adapter also accepts common `content`, `tool_calls`, `toolCalls`, `tool_results`, and `tool_call_id` aliases from Agent hosts. Tool-role messages are normalized to the internal result representation; no tool from the supplied transcript is executed.
+
+Options accepted by `compact_transcript` include:
 
 - `messages`: transcript messages with `role`, `text`, `toolUses`, and optional `toolResults`;
 - `options`: optional thresholds and token budgets from the original library;
 - `apiKey` and `model`: optional per-call overrides.
 
-The result contains the compacted `messages`, per-call `decisions`, and `stats`. It never executes tools from the supplied transcript.
+The result contains the compacted `messages`, per-call `decisions`, and `stats`.
 
 ## Development
 
@@ -36,4 +49,4 @@ npm run build
 npm run validate:plugin
 ```
 
-The original MIT license and core compaction implementation are retained. Claude Code-specific hooks are intentionally not part of the Codex plugin.
+The original MIT license and core compaction implementation are retained. Claude Code-specific hooks are intentionally not part of this portable Agent plugin.

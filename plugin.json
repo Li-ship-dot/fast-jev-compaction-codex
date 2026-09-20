@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "fast-jev-compaction",
   "version": "0.3.0",
-  "description": "On-demand, verbatim transcript compaction through Jev, exposed as a Codex MCP tool.",
+  "description": "Portable Agent MCP plugin for on-demand, verbatim Jev-guided transcript compaction.",
   "author": { "name": "Li-ship-dot", "url": "https://github.com/Li-ship-dot" },
   "homepage": "https://github.com/Li-ship-dot/fast-jev-compaction-codex",
   "repository": "https://github.com/Li-ship-dot/fast-jev-compaction-codex",
@@ -13,7 +13,7 @@
   "interface": {
     "displayName": "Fast Jev Compaction",
     "shortDescription": "Compact transcripts without rewriting kept content",
-    "longDescription": "Use Jev to decide which tool calls and results can be removed or truncated while preserving kept transcript content verbatim. Codex exposes this as an on-demand MCP tool; it does not replace Codex's internal automatic compaction.",
+    "longDescription": "Use Jev to decide which tool calls and results can be removed or truncated while preserving kept transcript content verbatim. Works with Agent hosts through MCP and includes a Codex compatibility manifest; it does not replace a host's internal automatic compaction.",
     "developerName": "Li-ship-dot",
     "category": "Productivity",
     "capabilities": ["Interactive", "Read"],

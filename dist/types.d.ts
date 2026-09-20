@@ -1,7 +1,7 @@
 export type Role = 'user' | 'assistant';
 /**
- * A tool_use block of an assistant message. `text` and `isError` mirror the
- * outcome once the transcript holds it (Claude Code attaches them).
+ * A tool call block in an agent transcript. `text` and `isError` may mirror
+ * the result when a host keeps call and result metadata together.
  */
 export interface ToolUse {
     tool_use_id: string;
@@ -10,15 +10,15 @@ export interface ToolUse {
     text?: string;
     isError?: boolean;
 }
-/** A tool_result block of a user message. */
+/** A tool result block. It can live on a separate tool-role message. */
 export interface ToolResult {
     tool_use_id: string;
     text: string;
     isError?: boolean;
 }
 /**
- * One transcript message. The shape is a subset of Claude Code's
- * `SessionMessage`, so a session transcript can be passed in as is.
+ * Canonical, agent-neutral transcript message used by the compaction core.
+ * Adapters may normalize a host's native message shape into this form.
  */
 export interface Message {
     role: Role;

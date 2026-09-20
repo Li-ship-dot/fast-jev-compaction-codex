@@ -1,15 +1,21 @@
 {
-  "name": "fast-jev-compaction-codex",
+  "name": "fast-jev-compaction-agent",
   "version": "0.3.0",
-  "description": "Codex MCP adapter for verbatim Jev-guided transcript compaction.",
+  "description": "Portable Agent MCP plugin for verbatim Jev-guided transcript compaction.",
   "type": "module",
   "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "files": ["dist", "plugin.json", ".codex-plugin/plugin.json", "mcp.json", ".mcp.json", "skills", "README.md", "LICENSE"],
   "engines": { "node": ">=18" },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "validate:plugin": "python3 /home/a/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py ."
+    "validate:plugin": "node scripts/validate-plugin.mjs",
+    "validate:portable": "node scripts/validate-plugin.mjs",
+    "demo": "tsx examples/demo.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
