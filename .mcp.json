@@ -3,7 +3,7 @@
     "fast_jev_compaction": {
       "command": "node",
       "args": [
-        "./mcp-server.js"
+        "./dist/mcp-server.js"
       ],
       "cwd": ".",
       "env_vars": [
