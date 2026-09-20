@@ -3,22 +3,31 @@
   "version": "0.3.0",
   "description": "On-demand, verbatim transcript compaction through Jev, exposed as a Codex MCP tool.",
   "author": {
-    "name": "tamaratran",
-    "url": "https://github.com/tamaratran"
+    "name": "Li-ship-dot",
+    "url": "https://github.com/Li-ship-dot"
   },
   "homepage": "https://github.com/Li-ship-dot/fast-jev-compaction-codex",
   "repository": "https://github.com/Li-ship-dot/fast-jev-compaction-codex",
   "license": "MIT",
-  "keywords": ["compaction", "context", "jev", "transcript", "mcp"],
+  "keywords": [
+    "compaction",
+    "context",
+    "jev",
+    "transcript",
+    "mcp"
+  ],
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json",
+  "mcpServers": "./mcp.json",
   "interface": {
     "displayName": "Fast Jev Compaction",
     "shortDescription": "Compact transcripts without rewriting kept content",
     "longDescription": "Use Jev to decide which tool calls and results can be removed or truncated while preserving kept transcript content verbatim. Codex exposes this as an on-demand MCP tool; it does not replace Codex's internal automatic compaction.",
     "developerName": "Li-ship-dot",
     "category": "Productivity",
-    "capabilities": ["Interactive", "Read"],
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
     "websiteURL": "https://github.com/tamaratran/fast-jev-compaction-codex",
     "defaultPrompt": [
       "Compact this transcript with Fast Jev Compaction.",
