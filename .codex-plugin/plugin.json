@@ -17,7 +17,7 @@
     "mcp"
   ],
   "skills": "./skills/",
-  "mcpServers": "./mcp.json",
+  "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Fast Jev Compaction",
     "shortDescription": "Compact transcripts without rewriting kept content",
