@@ -36,7 +36,7 @@ Options accepted by `compact_transcript` include:
 
 - `messages`: transcript messages with `role`, `text`, `toolUses`, and optional `toolResults`;
 - `options`: optional thresholds and token budgets from the original library;
-- `apiKey` and `model`: optional per-call overrides.
+- `model`: optional per-call model override; the MCP server reads `TYPESAFE_API_KEY` from its environment.
 
 The result contains the compacted `messages`, per-call `decisions`, and `stats`.
 
