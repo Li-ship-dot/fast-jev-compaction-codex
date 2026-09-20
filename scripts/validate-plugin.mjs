@@ -17,6 +17,9 @@ for (const [label, manifest] of [['plugin.json', rootManifest], ['.codex-plugin/
   if (!manifest.version) failures.push(`${label}: missing version`);
   if (!manifest.description) failures.push(`${label}: missing description`);
 }
+if (rootManifest.version !== codexManifest.version) failures.push('manifest versions differ');
+if (rootManifest.repository !== codexManifest.repository) failures.push('manifest repositories differ');
+if (rootManifest.homepage !== codexManifest.homepage) failures.push('manifest homepages differ');
 if (rootManifest.skills !== './skills/' || codexManifest.skills !== './skills/') failures.push('skill path is not portable');
 if (rootManifest.mcpServers !== './mcp.json') failures.push('portable manifest must point to ./mcp.json');
 if (codexManifest.mcpServers !== './.mcp.json') failures.push('Codex compatibility manifest must point to ./.mcp.json');

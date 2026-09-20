@@ -48,7 +48,7 @@ function call(value) {
     const name = string(item.tool ?? item.name ?? fn?.name);
     if (!id || !name)
         throw new Error('Tool id and name must be nonempty');
-    return { tool_use_id: id, tool: name, input: record(args),
+    return { tool_use_id: id, tool: name, input: record(args ?? {}),
         ...(item.text !== undefined ? { text: string(item.text) } : {}),
         ...(flag(item.isError) !== undefined ? { isError: flag(item.isError) } : {}) };
 }
