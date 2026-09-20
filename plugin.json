@@ -1,17 +1,15 @@
 {
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "fast-jev-compaction",
   "version": "0.3.0",
   "description": "On-demand, verbatim transcript compaction through Jev, exposed as a Codex MCP tool.",
-  "author": {
-    "name": "tamaratran",
-    "url": "https://github.com/tamaratran"
-  },
+  "author": { "name": "Li-ship-dot", "url": "https://github.com/Li-ship-dot" },
   "homepage": "https://github.com/Li-ship-dot/fast-jev-compaction-codex",
   "repository": "https://github.com/Li-ship-dot/fast-jev-compaction-codex",
   "license": "MIT",
   "keywords": ["compaction", "context", "jev", "transcript", "mcp"],
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json",
+  "mcpServers": "./mcp.json",
   "interface": {
     "displayName": "Fast Jev Compaction",
     "shortDescription": "Compact transcripts without rewriting kept content",
@@ -19,11 +17,8 @@
     "developerName": "Li-ship-dot",
     "category": "Productivity",
     "capabilities": ["Interactive", "Read"],
-    "websiteURL": "https://github.com/tamaratran/fast-jev-compaction-codex",
-    "defaultPrompt": [
-      "Compact this transcript with Fast Jev Compaction.",
-      "Show which tool results can be dropped without rewriting kept messages."
-    ],
+    "websiteURL": "https://github.com/Li-ship-dot/fast-jev-compaction-codex",
+    "defaultPrompt": ["Compact this transcript with Fast Jev Compaction.", "Show which tool results can be dropped without rewriting kept messages."],
     "brandColor": "#111827"
   }
 }

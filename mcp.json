@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "fast_jev_compaction": {
+      "command": "node",
+      "args": ["./dist/mcp-server.js"],
+      "cwd": ".",
+      "env_vars": ["TYPESAFE_API_KEY"]
+    }
+  }
+}
